@@ -7,9 +7,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Statistics</title>
 
-    <!-- Bootstrap -->
+    <!-- Bootstrap css-->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    <!-- charts js-->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.2.2/Chart.min.js" integrity="sha256-fQOizuxGMT1DCcF0rU6EK8zQM6TwsSWGTHjL5UpxLlU=" crossorigin="anonymous"></script>
+
+    <!-- jquery js-->
+    <script   src="https://code.jquery.com/jquery-3.1.0.min.js"   integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s="   crossorigin="anonymous"></script>
   </head>
   <body>
     <div class="container">
@@ -20,7 +27,7 @@
           <p><a href="/?sort_by=height">sort_by height</a></p>
           <p><a href="/?sort_by=experience">sort_by experience</a></p>
         </div>
-        <table class="table table-striped" style="width:80%;">
+        <table class="table table-striped">
           <thead>
             <tr>
               <th>#</th>
@@ -40,7 +47,92 @@
         {% endfor %}
           </tbody>
         </table>
+
+        <br>
+        <div class="row">
+          <div class="col-md-5 col-md-offset-1">
+            <canvas id="myChart1" width="100" height="100"></canvas>
+          </div>
+
+          <div class="col-md-5">
+            <canvas id="myChart2" width="100" height="100"></canvas>
+          </div>
+        </div>
       </center>
     </div>
+
+    <script>
+        function buildChart (chartName,labels,inputData,elementName) {
+            var ctx = document.getElementById(elementName).getContext("2d");
+
+            var data = {
+                    labels: labels,
+                    datasets: [
+                    {
+                      label: chartName,
+                      backgroundColor: [
+                          'rgba(255, 99, 132, 0.2)',
+                          'rgba(54, 162, 235, 0.2)',
+                          'rgba(255, 206, 86, 0.2)',
+                          'rgba(75, 192, 192, 0.2)',
+                          'rgba(153, 102, 255, 0.2)',
+                          'rgba(255, 159, 64, 0.2)'
+                      ],
+                      borderColor: [
+                          'rgba(255,99,132,1)',
+                          'rgba(54, 162, 235, 1)',
+                          'rgba(255, 206, 86, 1)',
+                          'rgba(75, 192, 192, 1)',
+                          'rgba(153, 102, 255, 1)',
+                          'rgba(255, 159, 64, 1)'
+                      ],
+                      borderWidth: 1,
+                      data: inputData,//[1, 3, 50, 4, 56, 55, 40]
+                    }
+                ]
+            };
+
+
+          var myBarChart = new Chart(ctx, {
+              type: 'bar',
+              data: data,
+              options: {}
+          });
+        }
+
+
+      function updateTeamDataByHeight (argument) {
+         url = 'http://localhost:8000/';
+         var chartName = "Average team player height";
+         var team_data;
+
+          $.get(url, function(data){
+
+              var names = data.teams;
+              var average_height = data.height;
+
+              buildChart(chartName,names,average_height,"myChart1");
+          });
+      }
+
+      function updateTeamDataByExp (argument) {
+         url = 'http://localhost:8000/?sort_by=experience';
+         var chartName = 'Average team player experience';
+         var team_data;
+
+          $.get(url, function(data){
+
+              var names = data.teams;
+              var average_exp = data.exp;
+
+              buildChart(chartName,names,average_exp,"myChart2");
+          });
+      }
+
+
+      updateTeamDataByHeight();
+      updateTeamDataByExp();
+
+    </script>
   </body>
 </html>

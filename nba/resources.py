@@ -57,9 +57,12 @@ class PlayerResource(ModelResource):
 
         try:
 
-            teams = Team.objects.filter(name=name)
-            if teams: team = teams[0]
-            else: raise ValueError("No team with that name exist")
+            teams = Team.objects.filter(name=team)
+
+            if teams:
+                team = teams[0]
+            else:
+                raise ValueError("No team with that name exist")
 
             player = Player.objects.create(name=name,
                                         age=age,
@@ -69,7 +72,7 @@ class PlayerResource(ModelResource):
                                         goals=goals)
 
         except IntegrityError:
-            raise IntegrityError("That player already exist")
+            raise ValueError("That player already exist")
 
         return bundle
 

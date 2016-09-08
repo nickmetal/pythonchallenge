@@ -1,3 +1,7 @@
+Features:
+    - we can't create a player if no one team has been created
+    - "team name" must equal to already existing team name
+
 -/ ->
 statistics with sorted by height by default
 http://localhost:8000/?sort_by=experience -> sorted by experience
