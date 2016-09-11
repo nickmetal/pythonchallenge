@@ -18,64 +18,49 @@ def index(request):
 
 
 def stat_by_player_height(request):
-    players = Player.objects.select_related('team').order_by('height')
+    teams = Team.objects.all()
+    averageByTeams = [] #[teamName,teamCity,averageHeightInTeam]
 
-    #получение уникальных ID из игроков команды
-    teams_id_list = set([p.team.id for p in players])
+    for team in teams:
+        #получаем список роста по командам
+        height_list = [p.height for p in team.player_set.all()]
 
-    #сортировка по макимальному росту
-    teams_id_list = reversed(list(teams_id_list))
-
-    #получение команд в порядке сортировки по весу(по убыванию веса)
-    teams =  [Team.objects.get(id=ind) for ind in teams_id_list]
+        averageByTeams.append([team.name,team.city,sum(height_list)/len(height_list)])
 
 
     if request.is_ajax():
-        average_height = []
-
-        teams_list = [team.name for team in teams]
-        players = Player.objects.all()
-
-        for team in teams_list:
-            #получаем рост игроков по командам
-            sortedPlayers = [p.height for p in players if str(p.team) == team]
-
-            #вычисляем средний рост игрока в команде
-            average_height.append(sum(sortedPlayers)/len(sortedPlayers))
+        teams_list = [team[0] for team in averageByTeams]
+        average_height = [team[2] for team in averageByTeams]
 
         return JsonResponse({'teams':teams_list,'height':average_height})
+
     else:
+        #сортировка списка по убываю для рейтинговой таблицы
+        averageByTeams.sort(key=lambda av_list: av_list[2],reverse=True)
+        teams = [(team[0],team[1]) for team in averageByTeams]
+
         return render(request,'nba/statistics.html',{'teams':teams})
 
 
 def stat_by_player_experience(request):
-    players = Player.objects.select_related('team').order_by('-experience')
+    teams = Team.objects.all()
+    averageExpByTeams = [] #[teamName,teamCity,averageHeightInTeam]
 
-    #получение уникальных ID из игроков команды
-    teams_id_list = [p.team.id for p in players]
-    for i in teams_id_list:
-        if teams_id_list.count(i)>1:
-            teams_id_list.remove(i)
+    for team in teams:
+        #получаем список опыта по командам
+        exp_list = [p.experience for p in team.player_set.all()]
+        averageExpByTeams.append([team.name,team.city,sum(exp_list)/len(exp_list)])
 
-
-    #получение команд в порядке сортировки по росту(по убыванию опыта)
-    teams =  [Team.objects.get(id=ind) for ind in teams_id_list]
 
     if request.is_ajax():
-        average_experience = []
+        teams_list = [team[0] for team in averageExpByTeams]
+        average_exp = [team[2] for team in averageExpByTeams]
 
-        teams_list = [team.name for team in teams]
-        players = Player.objects.all()
+        return JsonResponse({'teams':teams_list,'exp':average_exp})
 
-        for team in teams_list:
-            #получаем рост игроков по командам
-            sortedPlayers = [p.experience for p in players if str(p.team) == team]
-
-            #вычисляем средний рост игрока в команде
-            average_experience.append(sum(sortedPlayers)/len(sortedPlayers))
-
-        return JsonResponse({'teams':teams_list,'exp':average_experience})
     else:
+        #сортировка списка по убываю для рейтинговой таблицы
+        averageExpByTeams.sort(key=lambda av_list: av_list[2],reverse=True)
+        teams = [(team[0],team[1]) for team in averageExpByTeams]
+
         return render(request,'nba/statistics.html',{'teams':teams})
-
-

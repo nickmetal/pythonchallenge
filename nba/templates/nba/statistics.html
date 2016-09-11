@@ -39,8 +39,8 @@
         {% for team in teams %}
             <tr>
               <td>{{ forloop.counter }}</td>
-              <td>{{ team.name }}</td>
-              <td>{{ team.city }}</td>
+              <td>{{ team.0 }}</td>
+              <td>{{ team.1}}</td>
             </tr>
         {% empty %}
           <h2>No data</h2>
