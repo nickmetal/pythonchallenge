@@ -1,11 +1,15 @@
 Features:
     - we can't create a player if no one team has been created
     - "team name" must equal to already existing team name
+    - run server as http://localhost:8000/ for correct work with js
+
+
+Use default database with:
+    - login nba_admin
+    - password nba12345
+
 
 -/ ->
-statistics with sorted by height by default
-http://localhost:8000/?sort_by=experience -> sorted by experience
-
 
 - GET /team/:teamId  -> http://localhost:8000/api/v1/team/1/ -> json data
 - GET /player/:playerId -> http://localhost:8000/api/v1/player/1/ -> json data

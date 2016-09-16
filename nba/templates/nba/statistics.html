@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Statistics</title>
+    <title>NBA Statistics & Charts</title>
 
     <!-- Bootstrap css-->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
@@ -22,11 +22,23 @@
     <div class="container">
       <center>
         <h2>Statistics</h2>
-        <div class="chartbar">
-          <p><a href="#">sort_by quantity(unrealized)</a></p>
-          <p><a href="/?sort_by=height">sort_by height</a></p>
-          <p><a href="/?sort_by=experience">sort_by experience</a></p>
+        <div class="row">
+        <br>
+          <div id="links">
+            <div class="col-sm-3">
+              <a role="button" class="btn btn-info"
+                 href="/?sort_by=quantity" id="quantity">by quantity</a></div>
+
+            <div class="col-sm-3 col-sm-offset-2">
+              <a role="button" class="btn btn-info"
+                 href="/?sort_by=height" id="height">by height</a></div>
+
+            <div class="col-sm-3 col-sm-offset-1">
+              <a role="button" class="btn btn-info"
+                 href="/?sort_by=experience" id="experience">by experience</a></div>
+          </div>
         </div>
+        <br>
         <table class="table table-striped">
           <thead>
             <tr>
@@ -50,18 +62,52 @@
 
         <br>
         <div class="row">
-          <div class="col-md-5 col-md-offset-1">
-            <canvas id="myChart1" width="100" height="100"></canvas>
+          <div class="col-md-4">
+            <canvas id="myChart1" width="300" height="300"></canvas>
           </div>
 
-          <div class="col-md-5">
-            <canvas id="myChart2" width="100" height="100"></canvas>
+          <div class="col-md-4">
+            <canvas id="myChart2" width="200" height="200"></canvas>
+          </div>
+          <div class="col-md-4">
+            <canvas id="myChart3" width="100" height="100"></canvas>
           </div>
         </div>
       </center>
     </div>
 
     <script>
+
+        function setAciveButton () {
+          var current_link = window.location.href;
+          var current_sorting = current_link.substr(current_link.indexOf("=")+1);
+          var buttons_id = [];
+          var DEFAULT_SORTING_BY = 'quantity';// quantity height experience
+
+          buttons_id = $.map($('a.btn'),function(val){
+            return val.id;
+          });
+
+
+          for(var i=0;i<buttons_id.length;i++){
+            //when page load without get ars
+            if (current_link.length==current_sorting.length || current_sorting==DEFAULT_SORTING_BY) {
+              $('#'+DEFAULT_SORTING_BY).removeClass('btn btn-info');
+              $('#'+DEFAULT_SORTING_BY).addClass('btn btn-primary');
+
+            //when button id == sort method (get arg sort_by)
+            }else if(buttons_id[i]==current_sorting){
+              $('#'+buttons_id[i]).removeClass('btn btn-info');
+              $('#'+buttons_id[i]).addClass('btn btn-primary');
+
+            }else{
+              $('#'+buttons_id[i]).removeClass('btn btn-primary');
+              $('#'+buttons_id[i]).addClass('btn btn-info');
+            }
+          }
+
+        };
+
         function buildChart (chartName,labels,inputData,elementName) {
             var ctx = document.getElementById(elementName).getContext("2d");
 
@@ -87,7 +133,7 @@
                           'rgba(255, 159, 64, 1)'
                       ],
                       borderWidth: 1,
-                      data: inputData,//[1, 3, 50, 4, 56, 55, 40]
+                      data: inputData,
                     }
                 ]
             };
@@ -96,42 +142,62 @@
           var myBarChart = new Chart(ctx, {
               type: 'bar',
               data: data,
-              options: {}
-          });
+              options: {
+                        scales: {
+                            yAxes: [{
+                              ticks: {
+                                beginAtZero:true
+                              }
+                            }]
+                        }
+                      }
+            });
         }
 
+      function updateTeamDataByQuantity (argument) {
+        var url = 'http://localhost:8000/?sort_by=quantity';
+        var chartName = "Average team player quantity";
+        var team_data;
+
+          $.get(url, function(data){
+
+              var names = data.teams;
+              var average_quantity= data.quantity;
+              buildChart(chartName,names,average_quantity,"myChart1");
+          });
+      }
 
       function updateTeamDataByHeight (argument) {
-         url = 'http://localhost:8000/';
-         var chartName = "Average team player height";
-         var team_data;
+        var url = 'http://localhost:8000/?sort_by=height';
+        var chartName = "Average team player height";
+        var team_data;
 
           $.get(url, function(data){
 
               var names = data.teams;
               var average_height = data.height;
-
-              buildChart(chartName,names,average_height,"myChart1");
+              buildChart(chartName,names,average_height,"myChart2");
           });
       }
 
       function updateTeamDataByExp (argument) {
-         url = 'http://localhost:8000/?sort_by=experience';
-         var chartName = 'Average team player experience';
-         var team_data;
+        var url = 'http://localhost:8000/?sort_by=experience';
+        var chartName = 'Average team player experience';
+        var team_data;
 
           $.get(url, function(data){
 
               var names = data.teams;
               var average_exp = data.exp;
-
-              buildChart(chartName,names,average_exp,"myChart2");
+              buildChart(chartName,names,average_exp,"myChart3");
           });
       }
 
 
+      updateTeamDataByQuantity();
       updateTeamDataByHeight();
       updateTeamDataByExp();
+      setAciveButton();
 
     </script>
   </body>
